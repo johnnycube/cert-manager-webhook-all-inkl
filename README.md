@@ -9,7 +9,7 @@ The webhook is meant to be run on a kubernetes cluster. It uses kubernetes apis 
 
 ### Deploy with Helm
 
-An OCI helm chart is published as part of the ghcr packages: https://github.com/johnnycube/cert-manager-webhook-all-inkl/pkgs/container/allinkl-webhook
+An OCI helm chart is published as part of the [ghcr packages](https://github.com/johnnycube/cert-manager-webhook-all-inkl/pkgs/container/allinkl-webhook)
 
 To install use your favourite helm tool:
 
@@ -104,8 +104,8 @@ spec:
 
 ## Attributions
 
-This project includes code derived from [go-acme/lego] (MIT).
-This project includes code derived from [cert-manager/webhook-example] (Apache v2).
+This project includes code derived from [go-acme/lego](https://github.com/go-acme/lego) (MIT).<br />
+This project includes code derived from [cert-manager/webhook-example](https://github.com/cert-manager/webhook-example) (Apache v2).<br />
 See `THIRD_PARTY_NOTICES.md`.
 
 ## Contributions
