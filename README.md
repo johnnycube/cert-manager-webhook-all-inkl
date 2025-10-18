@@ -63,6 +63,9 @@ spec:
                 key: password
 ```
 
+Username and password are the credentials for your [KAS](https://kas.all-inkl.com/).
+
+
 ### Use with Ingress / Gateway API
 
 Cert manager can automate the creation of certificates when used in conjuntion with the [Gateway API](https://gateway-api.sigs.k8s.io/). To use this feature your gateway needs to be annotated with a cert-manager specific annotation. Also don't forget to activate the [gateway API support](https://cert-manager.io/docs/usage/gateway/) of cert-manager - deactivated by default on older versions.
