@@ -16,7 +16,7 @@ certManager:
 
 image:
   repository: ghcr.io/johnnycube/cert-manager-webhook-all-inkl
-  tag: "v0.1.0"
+  tag: "v0.1.0@sha256:9645c727fad8d0ecb8a854a4545827a9126a81482398d38d50517c4db6df4945"
   pullPolicy: IfNotPresent
 
 nameOverride: ""
