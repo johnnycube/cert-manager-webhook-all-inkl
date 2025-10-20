@@ -63,8 +63,42 @@ spec:
                 key: password
 ```
 
-Username and password are the credentials for your [KAS](https://kas.all-inkl.com/).
+Username and password are the credentials for your [KAS](https://kas.all-inkl.com/) login.
 
+## RBAC
+
+Keep ensure that the `ServiceAccount` is allowed to read the secret that stores the all-inkl.com credentials.
+
+```yaml
+---
+# Grant Webhook right to read secret in deployed namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: all-inkl:credentials-reader
+  namespace: cert-manager
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["allinkl-credentials"]
+    verbs: ["get"] # don't include list/watch if you want strict scoping
+---
+# Grant the webhook permission to read the ConfigMap containing the Kubernetes
+# apiserver's requestheader-ca-certificate.
+# This ConfigMap is automatically created by the Kubernetes apiserver.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: all-inkl:webhook-secret-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: all-inkl:credentials-reader
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: allinkl-webhook
+```
 
 ### Use with Ingress / Gateway API
 

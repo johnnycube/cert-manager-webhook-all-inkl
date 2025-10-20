@@ -3,8 +3,8 @@ name: Build and Release Helm Chart to GHCR
 on:
   push:
     branches: [main]
-    paths:
-      - "deploy/helm/**"
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
 
 permissions:
