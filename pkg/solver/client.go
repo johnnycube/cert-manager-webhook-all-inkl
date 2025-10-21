@@ -7,23 +7,19 @@ package solver
 import (
 	"context"
 	"fmt"
-	"sync"
+	"strings"
+	"time"
 
 	lego "github.com/johnnycube/cert-manager-webhook-all-inkl/pkg/lego/allinkl"
 )
 
-type AllinklClient struct {
-	recordIDs   map[string]string
-	recordIDsMu sync.Mutex
-}
+type AllinklClient struct{}
 
 func NewAllinklClient() *AllinklClient {
-	return &AllinklClient{
-		recordIDs: make(map[string]string),
-	}
+	return &AllinklClient{}
 }
 
-func (a *AllinklClient) upsert(user, pass, zone, name, key, fqdn string) error {
+func (a *AllinklClient) upsert(user, pass, zone, name, key string) error {
 
 	client := lego.NewClient(user)
 
@@ -36,6 +32,9 @@ func (a *AllinklClient) upsert(user, pass, zone, name, key, fqdn string) error {
 		return fmt.Errorf("allinkl: %w", err)
 	}
 	ctx = lego.WithContext(ctx, credential)
+
+	fmt.Println("create entry for zone: " + zone + " name: " + name + " key: " + key)
+	time.Sleep(1 * time.Second)
 
 	// create update request and send
 	record := lego.DNSRequest{
@@ -45,19 +44,15 @@ func (a *AllinklClient) upsert(user, pass, zone, name, key, fqdn string) error {
 		RecordData: key,
 	}
 
-	recordID, err := client.AddDNSSettings(ctx, record)
+	_, err = client.AddDNSSettings(ctx, record)
 	if err != nil {
 		return fmt.Errorf("allinkl: %w", err)
 	}
 
-	a.recordIDsMu.Lock()
-	a.recordIDs[fqdn] = recordID
-	a.recordIDsMu.Unlock()
-
 	return nil
 }
 
-func (a *AllinklClient) cleanup(user, pass, fqdn string) error {
+func (a *AllinklClient) cleanup(user, pass, zone, name string) error {
 
 	client := lego.NewClient(user)
 
@@ -71,17 +66,27 @@ func (a *AllinklClient) cleanup(user, pass, fqdn string) error {
 	}
 	ctx = lego.WithContext(ctx, credential)
 
-	// gets the record's unique ID from when we created it
-	a.recordIDsMu.Lock()
-	recordID, ok := a.recordIDs[fqdn]
-	a.recordIDsMu.Unlock()
-	if !ok {
-		return fmt.Errorf("allinkl: unknown record ID for '%s'", fqdn)
-	}
+	info, _ := client.GetDNSSettings(ctx, zone, "")
+	fmt.Printf("zone: %s: %+v\n", zone, info)
 
-	_, err = client.DeleteDNSSettings(ctx, recordID)
-	if err != nil {
-		return fmt.Errorf("allinkl: %w", err)
+	for _, i := range info {
+		if strings.ToUpper(i.Type) != "TXT" {
+			continue
+		}
+
+		if i.Name == name {
+			// This is ugly but needed to prevent KAS flood protection
+			fmt.Println("delete entry for zone: " + zone + " name: " + name)
+			time.Sleep(1 * time.Second)
+			idStr, ok := i.ID.(string)
+			if !ok {
+				return fmt.Errorf("allinkl: record ID is not a string for '%s'", name)
+			}
+			_, err = client.DeleteDNSSettings(ctx, idStr)
+			if err != nil {
+				return fmt.Errorf("allinkl: %w", err)
+			}
+		}
 	}
 
 	return nil

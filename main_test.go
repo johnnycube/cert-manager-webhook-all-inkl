@@ -5,6 +5,7 @@
 package main
 
 import (
+	"math/rand"
 	"os"
 	"testing"
 
@@ -15,29 +16,29 @@ import (
 
 var (
 	zone = os.Getenv("TEST_ZONE_NAME")
+	fqdn string
 )
 
 func TestRunsSuite(t *testing.T) {
-	// The manifest path should contain a file named config.json that is a
-	// snippet of valid configuration that should be included on the
-	// ChallengeRequest passed as part of the test cases.
-	//
+	fqdn = GetRandomString(20) + "." + zone
 
-	// Uncomment the below fixture when implementing your custom DNS provider
-	//fixture := acmetest.NewFixture(&customDNSProviderSolver{},
-	//	acmetest.SetResolvedZone(zone),
-	//	acmetest.SetAllowAmbientCredentials(false),
-	//	acmetest.SetManifestPath("testdata/my-custom-solver"),
-	//	acmetest.SetBinariesPath("_test/kubebuilder/bin"),
-	//)
 	solver := solver.New()
 	fixture := acmetest.NewFixture(solver,
-		acmetest.SetResolvedZone("kueber.eu."),
+		acmetest.SetResolvedZone(zone),
+		acmetest.SetResolvedFQDN(fqdn),
 		acmetest.SetManifestPath("testdata/allinkl"),
-		acmetest.SetDNSServer("ns5.kasserver.com."),
-		acmetest.SetUseAuthoritative(false),
+		acmetest.SetAllowAmbientCredentials(false),
 	)
-	//need to uncomment and  RunConformance delete runBasic and runExtended once https://github.com/cert-manager/cert-manager/pull/4835 is merged
-	fixture.RunConformance(t)
 
+	fixture.RunConformance(t)
+}
+
+func GetRandomString(n int) string {
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

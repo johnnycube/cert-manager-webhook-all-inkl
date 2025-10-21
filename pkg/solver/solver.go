@@ -91,7 +91,7 @@ func (c *allinklSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	err = c.a.upsert(string(username), string(password), ch.ResolvedZone, name, ch.Key, ch.ResolvedFQDN)
+	err = c.a.upsert(string(username), string(password), ch.ResolvedZone, name, ch.Key)
 	if err != nil {
 		log.Printf("ERR upsert: %v\n", err)
 		return fmt.Errorf("allinkl: %w", err)
@@ -116,7 +116,13 @@ func (c *allinklSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	err = c.a.cleanup(string(username), string(password), ch.ResolvedFQDN)
+	name, err := RelativeName(ch.ResolvedFQDN, ch.ResolvedZone)
+	if err != nil {
+		log.Printf("ERR getCredential: %v\n", err)
+		return err
+	}
+
+	err = c.a.cleanup(string(username), string(password), ch.ResolvedZone, name)
 	if err != nil {
 		return fmt.Errorf("allinkl: %w", err)
 	}

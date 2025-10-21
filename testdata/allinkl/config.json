@@ -1,10 +1,10 @@
 {
     "usernameKeySecretRef": {
-        "name": "allinkl-secret",
+        "name": "allinkl-credentials",
         "key": "username"
     },
     "passwordKeySecretRef": {
-        "name": "allinkl-secret",
-        "key": "passwords"
+        "name": "allinkl-credentials",
+        "key": "password"
     }
 }
