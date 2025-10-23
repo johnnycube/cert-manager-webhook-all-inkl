@@ -135,9 +135,9 @@ spec:
 ## Road to 1.0
 
 * [] Add (unit) tests
-* [] Ensure that the cert-manager testsuite is running
-* [] Proper documentation / README.md
-* [] Describe solution RBAC for ServiceAccount in Helm
+* [x] Ensure that the cert-manager testsuite is running
+* [x] Proper documentation / README.md
+* [x] Describe solution RBAC for ServiceAccount in Helm
 
 ## Attributions
 
