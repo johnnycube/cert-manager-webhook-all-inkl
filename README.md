@@ -14,7 +14,7 @@ An OCI helm chart is published as part of the [ghcr packages](https://github.com
 To install use your favourite helm tool:
 
 ```bash
-helm install allinkl-webhook oci://ghcr.io/johnnycube/allinkl-webhook-helm --version 0.1.0
+helm install allinkl-webhook oci://ghcr.io/johnnycube/allinkl-webhook-helm --version 0.3.0
 ```
 
 ### Create (Cluster-) Issuer and Certificate
