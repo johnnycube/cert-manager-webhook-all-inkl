@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/cert-manager/cert-manager v1.19.2
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/pkg/errors v0.9.1
 	k8s.io/api v0.34.3
 	k8s.io/apiextensions-apiserver v0.34.3
