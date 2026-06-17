@@ -10,6 +10,8 @@
 # solve the DNS01 challenge.
 groupName: acme.johanneskueber.com
 
+replicaCount: 1
+
 certManager:
   namespace: cert-manager
   serviceAccountName: cert-manager
