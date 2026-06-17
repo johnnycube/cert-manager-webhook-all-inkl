@@ -3,5 +3,19 @@
     "extends": [
         "config:best-practices",
         ":label(Renovate)"
+    ],
+    "packageRules": [
+        {
+            "description": "Update cert-manager together with the kubernetes libraries it pins, so cert-manager dictates the compatible k8s.io/* and controller-runtime versions in a single PR.",
+            "matchManagers": [
+                "gomod"
+            ],
+            "matchPackageNames": [
+                "github.com/cert-manager/cert-manager",
+                "k8s.io/**",
+                "sigs.k8s.io/controller-runtime"
+            ],
+            "groupName": "cert-manager and kubernetes libraries"
+        }
     ]
 }

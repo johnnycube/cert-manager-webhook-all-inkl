@@ -6,7 +6,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -15,12 +15,14 @@ import (
 )
 
 func main() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, nil)))
+
 	group := strings.TrimSpace(os.Getenv("GROUP_NAME"))
 	if group == "" {
 		group = "acme.johanneskueber.com"
 	}
 	if err := run(group); err != nil {
-		fmt.Fprintf(os.Stderr, "webhook exited: %v\n", err)
+		slog.Error("webhook exited", "error", err)
 		os.Exit(1)
 	}
 }

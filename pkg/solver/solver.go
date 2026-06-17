@@ -7,7 +7,7 @@ package solver
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
@@ -70,30 +70,29 @@ func (c *allinklSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan 
 // Returns nil on success. If the record already exists with the same value,
 // Present is idempotent and returns nil. Requires Initialize to have been called.
 func (c *allinklSolver) Present(ch *v1alpha1.ChallengeRequest) error {
-
-	log.Printf("CHALLENGE: %+v", ch)
+	slog.Info("presenting DNS-01 challenge", "fqdn", ch.ResolvedFQDN, "zone", ch.ResolvedZone)
 
 	cfg, err := loadConfig(ch.Config)
 	if err != nil {
-		log.Printf("ERR loadConfig: %v\n", err)
+		slog.Error("loadConfig failed", "error", err)
 		return err
 	}
 
 	username, password, err := c.getCredential(cfg, ch.ResourceNamespace)
 	if err != nil {
-		log.Printf("ERR getCredential: %v\n", err)
+		slog.Error("getCredential failed", "error", err)
 		return err
 	}
 
 	name, err := RelativeName(ch.ResolvedFQDN, ch.ResolvedZone)
 	if err != nil {
-		log.Printf("ERR getCredential: %v\n", err)
+		slog.Error("RelativeName failed", "error", err)
 		return err
 	}
 
 	err = c.a.upsert(string(username), string(password), ch.ResolvedZone, name, ch.Key)
 	if err != nil {
-		log.Printf("ERR upsert: %v\n", err)
+		slog.Error("upsert failed", "error", err)
 		return fmt.Errorf("allinkl: %w", err)
 	}
 
@@ -106,24 +105,29 @@ func (c *allinklSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 // (scoped to ch.ResourceNamespace), and instructs the All-Inkl API client to
 // delete the TXT record for ch.ResolvedFQDN.
 func (c *allinklSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
+	slog.Info("cleaning up DNS-01 challenge", "fqdn", ch.ResolvedFQDN, "zone", ch.ResolvedZone)
+
 	cfg, err := loadConfig(ch.Config)
 	if err != nil {
+		slog.Error("loadConfig failed", "error", err)
 		return err
 	}
 
 	username, password, err := c.getCredential(cfg, ch.ResourceNamespace)
 	if err != nil {
+		slog.Error("getCredential failed", "error", err)
 		return err
 	}
 
 	name, err := RelativeName(ch.ResolvedFQDN, ch.ResolvedZone)
 	if err != nil {
-		log.Printf("ERR getCredential: %v\n", err)
+		slog.Error("RelativeName failed", "error", err)
 		return err
 	}
 
-	err = c.a.cleanup(string(username), string(password), ch.ResolvedZone, name)
+	err = c.a.cleanup(string(username), string(password), ch.ResolvedZone, name, ch.Key)
 	if err != nil {
+		slog.Error("cleanup failed", "error", err)
 		return fmt.Errorf("allinkl: %w", err)
 	}
 

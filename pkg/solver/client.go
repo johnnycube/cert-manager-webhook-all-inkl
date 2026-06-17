@@ -7,6 +7,7 @@ package solver
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -33,7 +34,7 @@ func (a *AllinklClient) upsert(user, pass, zone, name, key string) error {
 	}
 	ctx = lego.WithContext(ctx, credential)
 
-	fmt.Println("create entry for zone: " + zone + " name: " + name + " key: " + key)
+	slog.Info("creating DNS TXT record", "zone", zone, "name", name)
 	time.Sleep(1 * time.Second)
 
 	// create update request and send
@@ -52,7 +53,7 @@ func (a *AllinklClient) upsert(user, pass, zone, name, key string) error {
 	return nil
 }
 
-func (a *AllinklClient) cleanup(user, pass, zone, name string) error {
+func (a *AllinklClient) cleanup(user, pass, zone, name, key string) error {
 
 	client := lego.NewClient(user)
 
@@ -66,17 +67,21 @@ func (a *AllinklClient) cleanup(user, pass, zone, name string) error {
 	}
 	ctx = lego.WithContext(ctx, credential)
 
-	info, _ := client.GetDNSSettings(ctx, zone, "")
-	fmt.Printf("zone: %s: %+v\n", zone, info)
+	info, err := client.GetDNSSettings(ctx, zone, "")
+	if err != nil {
+		return fmt.Errorf("allinkl: get dns settings: %w", err)
+	}
 
 	for _, i := range info {
 		if strings.ToUpper(i.Type) != "TXT" {
 			continue
 		}
 
-		if i.Name == name {
+		// Match on name AND value so we only delete the record this
+		// challenge created, never a concurrent challenge's record.
+		if i.Name == name && i.Data == key {
 			// This is ugly but needed to prevent KAS flood protection
-			fmt.Println("delete entry for zone: " + zone + " name: " + name)
+			slog.Info("deleting DNS TXT record", "zone", zone, "name", name)
 			time.Sleep(1 * time.Second)
 			idStr, ok := i.ID.(string)
 			if !ok {
