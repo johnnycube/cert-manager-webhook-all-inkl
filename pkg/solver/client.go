@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// Derived from cert-manager webhook examples.
 // This implements the DNS01 webhook interface: Present / CleanUp at exact FQDN with exact TXT.
 
 package solver
@@ -9,9 +8,8 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
-	"time"
 
-	lego "github.com/johnnycube/cert-manager-webhook-all-inkl/pkg/lego/allinkl"
+	"github.com/johnnycube/kasapi"
 )
 
 type AllinklClient struct{}
@@ -20,32 +18,40 @@ func NewAllinklClient() *AllinklClient {
 	return &AllinklClient{}
 }
 
+// Endpoint overrides for tests; empty means the kasapi defaults.
+var (
+	kasAPIEndpoint  string
+	kasAuthEndpoint string
+)
+
+// newKasClient builds a kasapi client for the given credentials. Session
+// handling and KAS flood-protection delays are managed inside the client.
+func newKasClient(user, pass string) (*kasapi.Client, error) {
+	return kasapi.New(kasapi.Config{
+		Login:    user,
+		Password: pass,
+		// KAS accounts commonly have sha1 session auth disabled
+		// (kas_auth_type_disabled); plain matches the previous behavior.
+		AuthType:     kasapi.AuthPlain,
+		APIEndpoint:  kasAPIEndpoint,
+		AuthEndpoint: kasAuthEndpoint,
+	})
+}
+
 func (a *AllinklClient) upsert(user, pass, zone, name, key string) error {
-
-	client := lego.NewClient(user)
-
-	ctx := context.Background()
-
-	identifier := lego.NewIdentifier(user, pass)
-
-	credential, err := identifier.Authentication(ctx, 60, true)
+	client, err := newKasClient(user, pass)
 	if err != nil {
 		return fmt.Errorf("allinkl: %w", err)
 	}
-	ctx = lego.WithContext(ctx, credential)
 
 	slog.Info("creating DNS TXT record", "zone", zone, "name", name)
-	time.Sleep(1 * time.Second)
 
-	// create update request and send
-	record := lego.DNSRequest{
-		ZoneHost:   zone,
-		RecordType: "TXT",
-		RecordName: name,
-		RecordData: key,
-	}
-
-	_, err = client.AddDNSSettings(ctx, record)
+	_, err = client.DNS.Create(context.Background(), kasapi.DNSRecord{
+		Zone: zone,
+		Name: name,
+		Type: "TXT",
+		Data: key,
+	})
 	if err != nil {
 		return fmt.Errorf("allinkl: %w", err)
 	}
@@ -54,41 +60,28 @@ func (a *AllinklClient) upsert(user, pass, zone, name, key string) error {
 }
 
 func (a *AllinklClient) cleanup(user, pass, zone, name, key string) error {
-
-	client := lego.NewClient(user)
-
-	ctx := context.Background()
-
-	identifier := lego.NewIdentifier(user, pass)
-
-	credential, err := identifier.Authentication(ctx, 60, true)
+	client, err := newKasClient(user, pass)
 	if err != nil {
 		return fmt.Errorf("allinkl: %w", err)
 	}
-	ctx = lego.WithContext(ctx, credential)
 
-	info, err := client.GetDNSSettings(ctx, zone, "")
+	ctx := context.Background()
+
+	records, err := client.DNS.List(ctx, zone)
 	if err != nil {
 		return fmt.Errorf("allinkl: get dns settings: %w", err)
 	}
 
-	for _, i := range info {
-		if strings.ToUpper(i.Type) != "TXT" {
+	for _, r := range records {
+		if !strings.EqualFold(r.Type, "TXT") {
 			continue
 		}
 
 		// Match on name AND value so we only delete the record this
 		// challenge created, never a concurrent challenge's record.
-		if i.Name == name && i.Data == key {
-			// This is ugly but needed to prevent KAS flood protection
+		if r.Name == name && r.Data == key {
 			slog.Info("deleting DNS TXT record", "zone", zone, "name", name)
-			time.Sleep(1 * time.Second)
-			idStr, ok := i.ID.(string)
-			if !ok {
-				return fmt.Errorf("allinkl: record ID is not a string for '%s'", name)
-			}
-			_, err = client.DeleteDNSSettings(ctx, idStr)
-			if err != nil {
+			if err := client.DNS.Delete(ctx, r.ID); err != nil {
 				return fmt.Errorf("allinkl: %w", err)
 			}
 		}
