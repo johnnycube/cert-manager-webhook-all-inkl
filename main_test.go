@@ -2,6 +2,12 @@
 // Derived from cert-manager webhook examples.
 // This implements the DNS01 webhook interface: Present / CleanUp at exact FQDN with exact TXT.
 
+// The conformance suite needs envtest binaries (TEST_ASSET_ETCD, ...) and real
+// KAS credentials in testdata/allinkl, and it writes real DNS records — so it
+// is opt-in via: go test -tags conformance. See testdata/allinkl/README.md.
+
+//go:build conformance
+
 package main
 
 import (

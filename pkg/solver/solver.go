@@ -188,13 +188,13 @@ func normDomain(s string) string {
 //
 //	fqdn="_acme-challenge.subdomain.example.com.", zone=".example.com."   -> "_acme-challenge.subdomain"
 //	fqdn="_acme-challenge.example.com",            zone="example.com"     -> "_acme-challenge"
-//	fqdn="example.com.",                           zone="example.com"     -> "@"
+//	fqdn="example.com.",                           zone="example.com"     -> "" (apex)
 func RelativeName(fqdn, zone string) (string, error) {
 	f := normDomain(fqdn)
 	z := normDomain(zone)
 
 	if f == z {
-		return "@", nil // apex
+		return "", nil // apex; KAS uses an empty record name for the zone apex
 	}
 	if strings.HasSuffix(f, "."+z) {
 		rel := strings.TrimSuffix(f, "."+z)
