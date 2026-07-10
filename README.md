@@ -141,8 +141,8 @@ spec:
 
 ## Attributions
 
-This project includes code derived from [go-acme/lego](https://github.com/go-acme/lego) (MIT).<br />
 This project includes code derived from [cert-manager/webhook-example](https://github.com/cert-manager/webhook-example) (Apache v2).<br />
+KAS API access is provided by [johnnycube/kasapi](https://github.com/johnnycube/kasapi) (Apache v2).<br />
 See `THIRD_PARTY_NOTICES.md`.
 
 ## Contributions
