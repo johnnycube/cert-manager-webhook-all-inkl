@@ -30,6 +30,9 @@ test -x "$TEST_ASSET_ETCD" && echo ok-etcd
 The suite creates and deletes real TXT records in the zone, so use a zone the
 KAS account controls:
 
+The suite is behind the `conformance` build tag so that plain `go test ./...`
+(e.g. in CI) does not require envtest binaries or credentials:
+
 ```bash
-TEST_ZONE_NAME=johanneskueber.com. go test -v -run TestRunsSuite -timeout 25m ./main_test.go
+TEST_ZONE_NAME=johanneskueber.com. go test -v -tags conformance -run TestRunsSuite -timeout 25m ./main_test.go
 ```
