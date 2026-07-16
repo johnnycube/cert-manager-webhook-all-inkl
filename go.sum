@@ -125,6 +125,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/johnnycube/kasapi v0.1.0 h1:ykR4r4wuASWIdsFhS8gpGkTzFG4cA72VyXJDZ3OQbuE=
 github.com/johnnycube/kasapi v0.1.0/go.mod h1:Wff7WU2YovmYH92hnP2FPdN61o8aZk+3xzey+gTCmsQ=
+github.com/johnnycube/kasapi v0.2.0 h1:tGE0FS2sYBqRl4PvwPjItPNoo1VmSi5j4th6ZeS7Juw=
+github.com/johnnycube/kasapi v0.2.0/go.mod h1:Wff7WU2YovmYH92hnP2FPdN61o8aZk+3xzey+gTCmsQ=
 github.com/jonboulle/clockwork v0.5.0 h1:Hyh9A8u51kptdkR+cqRpT1EebBwTn1oK9YfGYbdFz6I=
 github.com/jonboulle/clockwork v0.5.0/go.mod h1:3mZlmanh0g2NDKO5TWZVJAfofYk64M7XN3SzBPjZF60=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
