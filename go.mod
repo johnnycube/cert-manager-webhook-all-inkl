@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/cert-manager/cert-manager v1.21.0
-	github.com/johnnycube/kasapi v0.1.0
+	github.com/johnnycube/kasapi v0.2.0
 	github.com/pkg/errors v0.9.1
 	k8s.io/api v0.36.2
 	k8s.io/apiextensions-apiserver v0.36.2
