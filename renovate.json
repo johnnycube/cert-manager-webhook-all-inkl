@@ -16,6 +16,16 @@
                 "sigs.k8s.io/controller-runtime"
             ],
             "groupName": "cert-manager and kubernetes libraries"
+        },
+        {
+            "description": "The chart image tracks Chart.yaml appVersion (rendered via .Chart.AppVersion in the deployment template); values.yaml image.tag is intentionally empty, so Renovate must not pin a tag/digest there.",
+            "matchManagers": [
+                "helm-values"
+            ],
+            "matchFileNames": [
+                "deploy/helm/values.yaml"
+            ],
+            "enabled": false
         }
     ]
 }
