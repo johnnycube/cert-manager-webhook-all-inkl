@@ -21,7 +21,7 @@ image:
   # Leave empty to track the chart's appVersion (kept in sync automatically on
   # release). Set explicitly to pin a specific tag or an immutable digest, e.g.
   # "v0.4.0@sha256:...".
-  tag: ""
+  tag: "@sha256:7a62e87b306e0c196b80f800bff0383f9d03dd5de8763f35f7da934acbcba4ef"
   pullPolicy: IfNotPresent
 
 nameOverride: ""
