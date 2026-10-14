@@ -1,0 +1,57 @@
+# `make check` is the gate: lint, tests, coverage, audit, build, fleetlint.
+# Actions are pinned to commit SHAs; Renovate keeps the pins current.
+name: check
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * 1"   # weekly: catches new vulnerabilities in unchanged code
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0          # diff-cover and gitleaks need history
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5
+      - name: Shared tools (gitleaks, diff-cover), pinned and checksum-verified
+        env:
+          # renovate: datasource=github-releases depName=gitleaks/gitleaks
+          GITLEAKS_VERSION: v8.30.1
+          # renovate: datasource=pypi depName=diff-cover
+          DIFF_COVER_VERSION: 10.6.0
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/bin"
+          v=${GITLEAKS_VERSION#v}
+          base="https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}"
+          curl -sSfLO "${base}/gitleaks_${v}_linux_x64.tar.gz"
+          curl -sSfL "${base}/gitleaks_${v}_checksums.txt" | grep " gitleaks_${v}_linux_x64.tar.gz$" | sha256sum -c -
+          tar -xzf "gitleaks_${v}_linux_x64.tar.gz" -C "$HOME/.local/bin" gitleaks
+          rm "gitleaks_${v}_linux_x64.tar.gz"
+          pipx install "diff-cover==${DIFF_COVER_VERSION}"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: fleetlint (the check target runs it)
+        env:
+          # renovate: datasource=go depName=github.com/fleetlint/fleetlint
+          FLEETLINT_VERSION: v0.4.0
+        run: go install "github.com/fleetlint/fleetlint/cmd/fleetlint@${FLEETLINT_VERSION}"
+      - run: make tools
+      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - run: make check

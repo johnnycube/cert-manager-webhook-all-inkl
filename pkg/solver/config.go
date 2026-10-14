@@ -6,12 +6,14 @@ package solver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	extapi "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
+// Config is the webhook's solver config: the Secrets holding the KAS login and password.
 type Config struct {
 	UsernameSecretRef corev1.SecretKeySelector `json:"usernameKeySecretRef"`
 	PasswordSecretRef corev1.SecretKeySelector `json:"passwordKeySecretRef"`
@@ -22,10 +24,10 @@ type Config struct {
 // with a confusing error.
 func (c *Config) validate() error {
 	if c.UsernameSecretRef.Name == "" || c.UsernameSecretRef.Key == "" {
-		return fmt.Errorf("usernameKeySecretRef: both name and key must be set")
+		return errors.New("usernameKeySecretRef: both name and key must be set")
 	}
 	if c.PasswordSecretRef.Name == "" || c.PasswordSecretRef.Key == "" {
-		return fmt.Errorf("passwordKeySecretRef: both name and key must be set")
+		return errors.New("passwordKeySecretRef: both name and key must be set")
 	}
 	return nil
 }

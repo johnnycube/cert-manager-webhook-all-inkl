@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 
-ARG GO_VERSION=1.26
-
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine@sha256:3082400e369fa24d5fc60bca20edab3f6d604e0c5a690ec66b295eff4dd87ade AS build
 RUN apk add --no-cache git ca-certificates
 WORKDIR /src
 

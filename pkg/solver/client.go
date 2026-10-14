@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// This implements the DNS01 webhook interface: Present / CleanUp at exact FQDN with exact TXT.
 
 package solver
 
@@ -12,8 +11,10 @@ import (
 	"github.com/johnnycube/kasapi"
 )
 
+// AllinklClient creates and deletes TXT records through the KAS API; it opens a session per call.
 type AllinklClient struct{}
 
+// NewAllinklClient returns an AllinklClient.
 func NewAllinklClient() *AllinklClient {
 	return &AllinklClient{}
 }

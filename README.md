@@ -14,7 +14,7 @@ An OCI helm chart is published as part of the [ghcr packages](https://github.com
 To install use your favourite helm tool:
 
 ```bash
-helm install allinkl-webhook oci://ghcr.io/johnnycube/allinkl-webhook --version 0.4.2
+helm install allinkl-webhook oci://ghcr.io/johnnycube/allinkl-webhook --version 0.4.3
 ```
 
 ### Create (Cluster-) Issuer and Certificate
@@ -134,7 +134,7 @@ spec:
 
 ## Road to 1.0
 
-* [] Add (unit) tests
+* [x] Add (unit) tests
 * [x] Ensure that the cert-manager testsuite is running
 * [x] Proper documentation / README.md
 * [x] Describe solution RBAC for ServiceAccount in Helm
@@ -147,11 +147,9 @@ See `THIRD_PARTY_NOTICES.md`.
 
 ## Contributions
 
-If you've found an error in this sample, please file an issue.
-
-Patches are encouraged and may be submitted by forking this project and
-submitting a pull request. Since this project is still in its very early stages,
-if your change is substantial, please raise an issue first to discuss it.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, `make check` and the commit
+convention, and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the
+webhook works. Security reports go through [SECURITY.md](SECURITY.md).
 
 ## License
 

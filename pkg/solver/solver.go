@@ -2,6 +2,7 @@
 // Derived from cert-manager webhook examples.
 // This implements the DNS01 webhook interface: Present / CleanUp at exact FQDN with exact TXT.
 
+// Package solver implements the cert-manager DNS-01 webhook solver for all-inkl.com (KAS API).
 package solver
 
 import (
@@ -10,8 +11,8 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/cert-manager/cert-manager/pkg/acme/webhook"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
-	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,126 +22,100 @@ import (
 
 // allinklSolver implements the cert-manager DNS01 solver for All-Inkl.
 type allinklSolver struct {
-	k *kubernetes.Clientset
+	k kubernetes.Interface
 	a *AllinklClient
 }
 
-// New returns a new, uninitialized allinklSolver.
-//
-// The returned solver has no external dependencies set; call Initialize
-// to attach the Kubernetes and All-Inkl clients before use. New never
-// returns nil.
-func New() *allinklSolver { return &allinklSolver{} }
+// New returns an uninitialized solver; Initialize attaches the Kubernetes and All-Inkl clients.
+func New() webhook.Solver { return &allinklSolver{} }
 
-// The name must match .spec.acme.solvers[].dns01.webhook.solverName in the Issuer.
+// Name must match .spec.acme.solvers[].dns01.webhook.solverName in the Issuer.
 func (s *allinklSolver) Name() string { return "allinkl" }
 
-// Initialize sets up the solver's dependencies.
-//
-// Initialize builds a Kubernetes client from kubeClientConfig and stores it on
-// the receiver. It also constructs a new All-Inkl API client. This method is
-// typically called once during webhook startup.
-//
-// The stopCh is provided to satisfy the cert-manager webhook interface and is
-// not used.
-//
-// On success, c.k and c.a are non-nil. If the Kubernetes client cannot be
-// created, Initialize returns the underlying error and leaves c unchanged.
-//
-// Initialize is not concurrency-safe; call it during process startup before
-// using the solver from multiple goroutines.
-func (c *allinklSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
+// Initialize builds the Kubernetes client from kubeClientConfig. It runs once
+// at startup, before the solver is used concurrently. The stop channel is part
+// of the cert-manager interface and is not needed.
+func (s *allinklSolver) Initialize(kubeClientConfig *rest.Config, _ <-chan struct{}) error {
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
 		return err
 	}
 
-	c.k = cl
-	c.a = NewAllinklClient()
+	s.k = cl
+	s.a = NewAllinklClient()
 
 	return nil
 }
 
-// Present creates/updates the DNS-01 TXT record for the ACME challenge.
-//
-// It loads provider config from ch.Config, resolves credentials from Secrets in
-// ch.ResourceNamespace, computes the record name relative to ch.ResolvedZone,
-// and asks the All-Inkl client to upsert the TXT record for ch.ResolvedFQDN.
-//
-// Returns nil on success. If the record already exists with the same value,
-// Present is idempotent and returns nil. Requires Initialize to have been called.
-func (c *allinklSolver) Present(ch *v1alpha1.ChallengeRequest) error {
+// challenge holds what Present and CleanUp need from a ChallengeRequest.
+type challenge struct {
+	user, pass string
+	zone, name string
+	key        string
+}
+
+// resolve loads the solver config, reads the credentials from Secrets in the
+// challenge's namespace and computes the record name relative to the zone.
+func (s *allinklSolver) resolve(ch *v1alpha1.ChallengeRequest) (challenge, error) {
+	cfg, err := loadConfig(ch.Config)
+	if err != nil {
+		return challenge{}, err
+	}
+
+	username, password, err := s.getCredential(cfg, ch.ResourceNamespace)
+	if err != nil {
+		return challenge{}, err
+	}
+
+	name, err := RelativeName(ch.ResolvedFQDN, ch.ResolvedZone)
+	if err != nil {
+		return challenge{}, err
+	}
+
+	return challenge{
+		user: string(username), pass: string(password),
+		zone: ch.ResolvedZone, name: name, key: ch.Key,
+	}, nil
+}
+
+// Present creates the DNS-01 TXT record for the ACME challenge.
+func (s *allinklSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 	slog.Info("presenting DNS-01 challenge", "fqdn", ch.ResolvedFQDN, "zone", ch.ResolvedZone)
 
-	cfg, err := loadConfig(ch.Config)
+	c, err := s.resolve(ch)
 	if err != nil {
-		slog.Error("loadConfig failed", "error", err)
+		slog.Error("present failed", "error", err)
 		return err
 	}
 
-	username, password, err := c.getCredential(cfg, ch.ResourceNamespace)
-	if err != nil {
-		slog.Error("getCredential failed", "error", err)
-		return err
-	}
-
-	name, err := RelativeName(ch.ResolvedFQDN, ch.ResolvedZone)
-	if err != nil {
-		slog.Error("RelativeName failed", "error", err)
-		return err
-	}
-
-	err = c.a.upsert(string(username), string(password), ch.ResolvedZone, name, ch.Key)
-	if err != nil {
+	if err := s.a.upsert(c.user, c.pass, c.zone, c.name, c.key); err != nil {
 		slog.Error("upsert failed", "error", err)
-		return fmt.Errorf("allinkl: %w", err)
+		return err
 	}
 
 	return nil
 }
 
-// CleanUp removes the DNS-01 TXT record previously created for the challenge.
-//
-// It reads provider configuration from ch.Config, resolves All-Inkl credentials
-// (scoped to ch.ResourceNamespace), and instructs the All-Inkl API client to
-// delete the TXT record for ch.ResolvedFQDN.
-func (c *allinklSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
+// CleanUp removes the TXT record Present created; records of other challenges stay.
+func (s *allinklSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 	slog.Info("cleaning up DNS-01 challenge", "fqdn", ch.ResolvedFQDN, "zone", ch.ResolvedZone)
 
-	cfg, err := loadConfig(ch.Config)
-	if err != nil {
-		slog.Error("loadConfig failed", "error", err)
-		return err
-	}
-
-	username, password, err := c.getCredential(cfg, ch.ResourceNamespace)
-	if err != nil {
-		slog.Error("getCredential failed", "error", err)
-		return err
-	}
-
-	name, err := RelativeName(ch.ResolvedFQDN, ch.ResolvedZone)
-	if err != nil {
-		slog.Error("RelativeName failed", "error", err)
-		return err
-	}
-
-	err = c.a.cleanup(string(username), string(password), ch.ResolvedZone, name, ch.Key)
+	c, err := s.resolve(ch)
 	if err != nil {
 		slog.Error("cleanup failed", "error", err)
-		return fmt.Errorf("allinkl: %w", err)
+		return err
+	}
+
+	if err := s.a.cleanup(c.user, c.pass, c.zone, c.name, c.key); err != nil {
+		slog.Error("cleanup failed", "error", err)
+		return err
 	}
 
 	return nil
 }
 
-// getCredential returns the All-Inkl username and password from Kubernetes
-// Secrets as configured in cfg.
-//
-// It looks up cfg.UsernameSecretRef and cfg.PasswordSecretRef in the
-// namespace ns via getSecretData. On success it returns (username, password)
-// as raw bytes. Callers should avoid logging these values and should zero
-// them after use if they’re copied to longer-lived buffers.
+// getCredential returns the username and password from the Secrets cfg
+// references in namespace ns. Callers must not log them.
 func (s *allinklSolver) getCredential(cfg *Config, ns string) ([]byte, []byte, error) {
 	username, err := s.getSecretData(cfg.UsernameSecretRef, ns)
 	if err != nil {
@@ -155,27 +130,22 @@ func (s *allinklSolver) getCredential(cfg *Config, ns string) ([]byte, []byte, e
 	return username, password, nil
 }
 
-// getSecretData returns the value of selector.Key from the Secret named
-// selector.Name in namespace ns.
-//
-// It fetches the Secret via the Kubernetes CoreV1 client. On success it
-// returns the raw bytes from secret.Data[selector.Key]. If the Secret is
-// missing, or the key does not exist, it returns a wrapped error. Secrets
-// are never logged and their values are not included in errors.
+// getSecretData returns selector.Key of the Secret selector.Name in namespace
+// ns. Errors name the Secret and key, never the value.
 func (s *allinklSolver) getSecretData(selector corev1.SecretKeySelector, ns string) ([]byte, error) {
 	secret, err := s.k.CoreV1().Secrets(ns).Get(context.TODO(), selector.Name, v1.GetOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to load secret %q", ns+"/"+selector.Name)
+		return nil, fmt.Errorf("failed to load secret %q: %w", ns+"/"+selector.Name, err)
 	}
 
 	if data, ok := secret.Data[selector.Key]; ok {
 		return data, nil
 	}
 
-	return nil, errors.Errorf("no key %q in secret %q", selector.Key, ns+"/"+selector.Name)
+	return nil, fmt.Errorf("no key %q in secret %q", selector.Key, ns+"/"+selector.Name)
 }
 
-// normalize: lower-case, trim leading/trailing dots
+// normDomain lower-cases s and trims leading and trailing dots.
 func normDomain(s string) string {
 	s = strings.ToLower(s)
 	s = strings.TrimPrefix(s, ".")

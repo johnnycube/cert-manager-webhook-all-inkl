@@ -7,25 +7,37 @@ on:
       - "v*.*.*"
   workflow_dispatch:
 
-# GITHUB_TOKEN can push to ghcr.io
 permissions:
   contents: read
-  packages: write
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: false   # never abort a push half-way
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write        # push to ghcr.io
+      id-token: write        # keyless cosign and the provenance attestation
+      attestations: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-      # (Optional) Enable multi-arch builds; keep if you plan to add arm64
       - name: Set up QEMU
         uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Log in to GHCR
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
@@ -46,13 +58,30 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
+      # SBOM and SLSA provenance are attached to the image index by BuildKit.
       - name: Build and push
+        id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          sbom: true
+          provenance: mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Sign the image by digest (cosign keyless)
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: cosign sign --yes "${IMAGE}@${DIGEST}"
+
+      - name: Build provenance attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true

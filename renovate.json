@@ -2,7 +2,9 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:best-practices",
-        ":label(Renovate)"
+        ":label(Renovate)",
+        "customManagers:makefileVersions",
+        "customManagers:githubActionsVersions"
     ],
     "packageRules": [
         {
@@ -27,5 +29,10 @@
             ],
             "enabled": false
         }
-    ]
+    ],
+    "minimumReleaseAge": "3 days",
+    "pre-commit": {
+        "enabled": true
+    },
+    "osvVulnerabilityAlerts": true
 }

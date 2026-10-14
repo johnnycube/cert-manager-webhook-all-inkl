@@ -6,8 +6,7 @@ toolchain go1.26.9
 
 require (
 	github.com/cert-manager/cert-manager v1.21.0
-	github.com/johnnycube/kasapi v0.3.2
-	github.com/pkg/errors v0.9.1
+	github.com/johnnycube/kasapi v0.3.3
 	k8s.io/api v0.36.2
 	k8s.io/apiextensions-apiserver v0.36.2
 	k8s.io/apimachinery v0.36.2
