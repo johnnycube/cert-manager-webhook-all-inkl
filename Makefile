@@ -63,9 +63,10 @@ cover: ## total coverage >= COVER_MIN, plus changed lines >= COVER_MIN when diff
 	  diff-cover coverage/cobertura.xml --compare-branch=origin/$(MAIN_BRANCH) --fail-under=$(COVER_MIN)
 	else echo "diff-cover/gocover-cobertura not installed: changed-line gate skipped"; fi
 
+# go-licenses spots stdlib packages by GOROOT; pass the active toolchain's, not the one it was built with
 audit: ## vulnerabilities, licenses, tidy module graph, secrets
 	govulncheck $(PKGS)
-	go-licenses check $(PKGS) --allowed_licenses=$(LICENSES)
+	GOROOT=$$(go env GOROOT) go-licenses check $(PKGS) --allowed_licenses=$(LICENSES)
 	go mod tidy -diff
 	gitleaks git --no-banner --redact .
 
