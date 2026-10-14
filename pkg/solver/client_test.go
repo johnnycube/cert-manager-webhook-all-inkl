@@ -23,7 +23,7 @@ func dnsRecordXML(id, name, typ, data string) string {
 		"</item>"
 }
 
-func withFakeKas(t *testing.T, handler kasapitest.Handler) *kasapitest.Server {
+func withFakeKas(t *testing.T, handler kasapitest.Handler) {
 	t.Helper()
 	srv := kasapitest.New(t, handler)
 	kasAPIEndpoint = srv.APIURL()
@@ -32,7 +32,6 @@ func withFakeKas(t *testing.T, handler kasapitest.Handler) *kasapitest.Server {
 		kasAPIEndpoint = ""
 		kasAuthEndpoint = ""
 	})
-	return srv
 }
 
 func TestUpsert(t *testing.T) {
@@ -94,7 +93,7 @@ func TestCleanup(t *testing.T) {
 }
 
 func TestCleanupBadCredentials(t *testing.T) {
-	withFakeKas(t, func(action string, params map[string]any) (string, string) {
+	withFakeKas(t, func(action string, _ map[string]any) (string, string) {
 		return "", "unexpected_action_" + action
 	})
 

@@ -2,6 +2,7 @@
 // Derived from cert-manager webhook examples.
 // This implements the DNS01 webhook interface: Present / CleanUp at exact FQDN with exact TXT.
 
+// Command webhook-allinkl runs the cert-manager DNS-01 webhook for all-inkl.com.
 package main
 
 import (
