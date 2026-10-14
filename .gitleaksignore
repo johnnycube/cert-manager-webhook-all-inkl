@@ -1,0 +1,4 @@
+# Fake KAS session tokens in test fixtures copied from go-acme/lego (providers/dns/allinkl/internal/fixtures), removed in 0.4.0.
+e87b762d67a97fe14311fb020c69d60ff59c645d:pkg/lego/allinkl/fixtures/add_dns_settings-request.xml:generic-api-key:4
+e87b762d67a97fe14311fb020c69d60ff59c645d:pkg/lego/allinkl/fixtures/delete_dns_settings-request.xml:generic-api-key:4
+e87b762d67a97fe14311fb020c69d60ff59c645d:pkg/lego/allinkl/fixtures/get_dns_settings-request.xml:generic-api-key:4
