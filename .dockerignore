@@ -1,0 +1,10 @@
+# The build needs go.mod, go.sum and the Go sources only.
+.git
+.github
+.env*
+bin/
+dist/
+coverage/
+deploy/
+testdata/
+*.md
