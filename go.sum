@@ -115,6 +115,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/johnnycube/kasapi v0.3.2 h1:xjWJZFs3qQqR29sUo0Zv9l5KsTpYdS3PQHpesMUg3sA=
 github.com/johnnycube/kasapi v0.3.2/go.mod h1:hB76tTSAAarVMXSkicEZi7M6wa3EKUf83GbbzgJUZcw=
+github.com/johnnycube/kasapi v0.3.3 h1:DaTyXmp7DuaTIeekj6WEoD/eCmFwCMfIT6W/zPsQqhM=
+github.com/johnnycube/kasapi v0.3.3/go.mod h1:hB76tTSAAarVMXSkicEZi7M6wa3EKUf83GbbzgJUZcw=
 github.com/jonboulle/clockwork v0.5.0 h1:Hyh9A8u51kptdkR+cqRpT1EebBwTn1oK9YfGYbdFz6I=
 github.com/jonboulle/clockwork v0.5.0/go.mod h1:3mZlmanh0g2NDKO5TWZVJAfofYk64M7XN3SzBPjZF60=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
