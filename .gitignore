@@ -32,3 +32,7 @@ go.work.sum
 # .vscode/
 
 testdata/allinkl/allinkl-credentials.yaml
+# Build and test output
+bin/
+dist/
+coverage/
