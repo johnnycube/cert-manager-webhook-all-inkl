@@ -6,8 +6,11 @@ are taken from the GitHub release notes.
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-14
+
 ### Changed
 
+- kasapi 0.3.3.
 - `Present` and `CleanUp` share one path that reads the config, the
   credentials and the record name. Errors carry one `allinkl:` prefix instead
   of two. `github.com/pkg/errors` is no longer a dependency.
@@ -66,7 +69,8 @@ are taken from the GitHub release notes.
 
 - First working release: normal domains, wildcards and sub-subdomains.
 
-[Unreleased]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.3.0...v0.4.0
