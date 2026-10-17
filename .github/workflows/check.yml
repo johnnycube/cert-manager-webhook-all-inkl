@@ -50,7 +50,7 @@ jobs:
       - name: fleetlint (the check target runs it)
         env:
           # renovate: datasource=go depName=github.com/fleetlint/fleetlint
-          FLEETLINT_VERSION: v0.4.0
+          FLEETLINT_VERSION: v0.4.1
         run: go install "github.com/fleetlint/fleetlint/cmd/fleetlint@${FLEETLINT_VERSION}"
       - run: make tools
       - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
