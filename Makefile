@@ -13,7 +13,7 @@ ENGINE      ?= $(shell command -v podman >/dev/null && echo podman || echo docke
 LICENSES    ?= MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC
 # Each pin carries a `# renovate:` comment so Renovate bumps it (customManagers:makefileVersions).
 # renovate: datasource=go depName=github.com/golangci/golangci-lint/v2
-GOLANGCI_VERSION    ?= v2.14.0
+GOLANGCI_VERSION    ?= v2.15.0
 # renovate: datasource=go depName=golang.org/x/vuln
 GOVULNCHECK_VERSION ?= v1.9.0
 # renovate: datasource=go depName=github.com/boumenot/gocover-cobertura
