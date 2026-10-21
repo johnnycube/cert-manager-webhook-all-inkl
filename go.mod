@@ -2,7 +2,7 @@ module github.com/johnnycube/cert-manager-webhook-all-inkl
 
 go 1.26.0
 
-toolchain go1.26.10
+toolchain go1.27.3
 
 require (
 	github.com/cert-manager/cert-manager v1.21.2
