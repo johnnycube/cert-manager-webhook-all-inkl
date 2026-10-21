@@ -6,6 +6,20 @@ are taken from the GitHub release notes.
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-10-21
+
+### Security
+
+- Built with Go 1.26.10, which distrusts compromised intermediate certificates
+  in crypto/x509 (GO-2026-6809, CVE-2026-111943).
+- cel-go 0.30.0 (GO-2026-6094) and etcd client/pkg 3.6.14 (GO-2026-6107).
+  Both are transitive dependencies of the Kubernetes libraries; the webhook
+  does not call the affected code.
+
+### Changed
+
+- kasapi 0.3.4 and cert-manager 1.21.2. No changes to the webhook code.
+
 ## [0.4.3] - 2026-10-14
 
 ### Changed
@@ -69,7 +83,8 @@ are taken from the GitHub release notes.
 
 - First working release: normal domains, wildcards and sub-subdomains.
 
-[Unreleased]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.0...v0.4.1
