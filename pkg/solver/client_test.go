@@ -40,7 +40,7 @@ func TestUpsert(t *testing.T) {
 		switch action {
 		case "add_dns_settings":
 			gotParams = params
-			return `<value xsi:type="xsd:string">12345</value>`, ""
+			return `12345`, ""
 		default:
 			return "", "unexpected_action_" + action
 		}
@@ -75,7 +75,7 @@ func TestCleanup(t *testing.T) {
 				dnsRecordXML("3", "www", "A", "192.0.2.1"), ""
 		case "delete_dns_settings":
 			deleted = append(deleted, fmt.Sprint(params["record_id"]))
-			return `<value xsi:type="xsd:string">TRUE</value>`, ""
+			return `TRUE`, ""
 		default:
 			return "", "unexpected_action_" + action
 		}

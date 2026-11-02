@@ -6,6 +6,17 @@ are taken from the GitHub release notes.
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-11-02
+
+### Changed
+
+- kasapi 0.6.0. The flood delay between KAS requests is read where KAS
+  reports it, so the webhook waits what the server asks for instead of a
+  fixed 2 s between calls; the HTTP client refuses redirects and takes the
+  proxy settings of the environment; a malformed KAS response is reported by
+  its shape, never its content. No changes to the webhook code; the test
+  fixtures now return the plain ReturnInfo values a real response carries.
+
 ## [0.4.4] - 2026-10-21
 
 ### Security
@@ -83,7 +94,8 @@ are taken from the GitHub release notes.
 
 - First working release: normal domains, wildcards and sub-subdomains.
 
-[Unreleased]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.4...HEAD
+[Unreleased]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/johnnycube/cert-manager-webhook-all-inkl/compare/v0.4.1...v0.4.2
