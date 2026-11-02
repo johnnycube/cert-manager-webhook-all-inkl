@@ -72,7 +72,7 @@ func TestPresent(t *testing.T) {
 			return "", "unexpected_action_" + action
 		}
 		got = params
-		return `<value xsi:type="xsd:string">1</value>`, ""
+		return `1`, ""
 	})
 
 	s := newTestSolver(kasSecret(map[string]string{"user": "w0123456", "pass": "secret"}))
@@ -92,7 +92,7 @@ func TestCleanUp(t *testing.T) {
 			return dnsRecordXML("7", "_acme-challenge", "TXT", "token-value"), ""
 		case "delete_dns_settings":
 			deleted = append(deleted, fmt.Sprint(params["record_id"]))
-			return `<value xsi:type="xsd:string">TRUE</value>`, ""
+			return `TRUE`, ""
 		default:
 			return "", "unexpected_action_" + action
 		}

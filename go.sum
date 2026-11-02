@@ -113,8 +113,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 h1:5VipnvEpbqr2gA2VbM+nYVbkIF2
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0/go.mod h1:Hyl3n6Twe1hvtd9XUXDec4pTvgMSEixRuQKPTMH2bNs=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/johnnycube/kasapi v0.3.4 h1:aBDuvHoQlIzxJnXQaGm9Blw+R4ZBCpTJe4VaA/Hfqp4=
-github.com/johnnycube/kasapi v0.3.4/go.mod h1:dvb8vT/1WdzYYyo/H6NUEoRSa2sY8Jfa/sEZc4TOcos=
+github.com/johnnycube/kasapi v0.6.0 h1:Ep18eIc5vwM4wJp5Q0wLHhXqBL72VS8DeA4r8JbFwQM=
+github.com/johnnycube/kasapi v0.6.0/go.mod h1:dvb8vT/1WdzYYyo/H6NUEoRSa2sY8Jfa/sEZc4TOcos=
 github.com/jonboulle/clockwork v0.5.0 h1:Hyh9A8u51kptdkR+cqRpT1EebBwTn1oK9YfGYbdFz6I=
 github.com/jonboulle/clockwork v0.5.0/go.mod h1:3mZlmanh0g2NDKO5TWZVJAfofYk64M7XN3SzBPjZF60=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
