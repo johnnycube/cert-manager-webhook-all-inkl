@@ -1,5 +1,9 @@
 name: Build and Release Helm Chart to GHCR
 
+# A push to main lints and packages the chart; only a v* tag publishes it. The
+# chart version is immutable that way: before, every push to main pushed the
+# chart again under the version in Chart.yaml and changed the digest of a
+# released version.
 on:
   push:
     branches: [main]
@@ -56,13 +60,22 @@ jobs:
           mkdir -p dist
           helm package ./ --destination dist
 
+      - name: Tag matches the chart version
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          TAG: ${{ github.ref_name }}
+        run: test "$TAG" = "v$VERSION" || { echo "tag $TAG is not chart version v$VERSION"; exit 1; }
+
       - name: Login to GHCR for Helm OCI
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           ACTOR: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: printf '%s' "$TOKEN" | helm registry login ghcr.io -u "$ACTOR" --password-stdin
 
       - name: Push to GHCR (OCI) and sign by digest (cosign keyless)
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           CHART: ${{ steps.meta.outputs.name }}
           VERSION: ${{ steps.meta.outputs.version }}
