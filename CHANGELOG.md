@@ -6,6 +6,20 @@ are taken from the GitHub release notes.
 
 ## [Unreleased]
 
+## [0.4.7] - 2026-11-20
+
+### Fixed
+
+- The chart is published only from a release tag, and the tag must match the
+  chart version. Every push to main pushed the chart again under the version
+  in Chart.yaml, so the digest of a released chart version changed with every
+  later merge. 0.4.5 and 0.4.6 were rebuilt this way from unchanged chart
+  files. Pin 0.4.7 or later when you pin the chart by digest.
+
+### Changed
+
+- No changes to the webhook code or the chart templates.
+
 ## [0.4.6] - 2026-11-20
 
 ### Security
