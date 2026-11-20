@@ -6,6 +6,24 @@ are taken from the GitHub release notes.
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-11-20
+
+### Security
+
+- Built with Go 1.27.4, which fixes a crash of HTTP/1 servers caused by a
+  header race in net/http's MaxBytesReader (GO-2026-6859, CVE-2026-97054).
+  The webhook serves its API over net/http.
+- OpenTelemetry SDK 1.47.0 (CVE-2026-128085, GHSA-q7gw-24fr-5p69): the
+  attribute value length limit could be bypassed. A transitive dependency of
+  the Kubernetes API server library.
+- golang.org/x/crypto 0.59.0 (GO-2026-5932, the unmaintained openpgp
+  package). A transitive dependency; the webhook does not compile the
+  package in.
+
+### Changed
+
+- Dependency updates only. No changes to the webhook code.
+
 ## [0.4.5] - 2026-11-02
 
 ### Changed
